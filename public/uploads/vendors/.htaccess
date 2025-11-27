@@ -1,0 +1,53 @@
+# Disable PHP execution in upload directory
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# For Apache 2.4+ with mod_access_compat
+<IfModule mod_authz_core.c>
+    # Deny all by default
+    <FilesMatch ".*">
+        Require all denied
+    </FilesMatch>
+    
+    # Allow only specific safe file types
+    <FilesMatch "\.(pdf|docx?|xlsx?|jpe?g|png)$">
+        Require all granted
+    </FilesMatch>
+</IfModule>
+
+# Fallback for Apache 2.2
+<IfModule !mod_authz_core.c>
+    Order Deny,Allow
+    Deny from all
+    <FilesMatch "\.(pdf|docx?|xlsx?|jpe?g|png)$">
+        Allow from all
+    </FilesMatch>
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes -ExecCGI
+
+# Additional security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set Content-Disposition "inline"
+</IfModule>
+
+# Remove handlers for all files to prevent script execution
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .phps .cgi .pl .py .jsp .asp .shtml .sh
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .phps .cgi .pl .py .jsp .asp .shtml .sh
+
+# Force MIME type for images and documents
+<IfModule mod_mime.c>
+    AddType application/pdf .pdf
+    AddType application/msword .doc
+    AddType application/vnd.openxmlformats-officedocument.wordprocessingml.document .docx
+    AddType application/vnd.ms-excel .xls
+    AddType application/vnd.openxmlformats-officedocument.spreadsheetml.sheet .xlsx
+    AddType image/jpeg .jpg .jpeg
+    AddType image/png .png
+</IfModule>

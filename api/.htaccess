@@ -1,0 +1,48 @@
+# =====================================================
+# PHP API Backend .htaccess for cPanel
+# Copy this file to public_html/License/api/.htaccess
+# =====================================================
+
+RewriteEngine On
+Options -MultiViews -Indexes
+
+# CORS Headers for API
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    Header always set Access-Control-Max-Age "86400"
+</IfModule>
+
+# Handle CORS preflight OPTIONS requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# If the requested file exists (like login.php, currencies.php, etc.), serve it directly
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^.*$ - [L]
+
+# Route all other API requests through index.php
+# This handles RESTful routes like /vendors, /clients, /licenses, etc.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L,QSA]
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options SAMEORIGIN
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Prevent access to sensitive files
+<FilesMatch "\.(env|log|ini|md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent access to backup and config files
+<FilesMatch "(^#.*#|\.(bak|config|sql|fla|psd|log|sh)|~)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

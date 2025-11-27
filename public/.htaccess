@@ -1,0 +1,49 @@
+# =====================================================
+# React + PHP cPanel Deployment .htaccess
+# Copy this file to public_html/License/.htaccess
+# =====================================================
+
+# Rewrite rules for React Router
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /License/
+  
+  # If the request is for an existing file, serve it directly
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+  
+  # If the request is for an existing directory, serve it
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  
+  # Route API requests to PHP backend
+  RewriteCond %{REQUEST_URI} ^/License/api/
+  RewriteRule ^api/(.*)$ api/$1 [L]
+  
+  # For React Router - all other requests go to index.html
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Security: Prevent directory listing
+Options -Indexes
+
+# Security: Prevent access to hidden files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Cache control for static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>
+
+# GZIP compression (if supported)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json
+</IfModule>
